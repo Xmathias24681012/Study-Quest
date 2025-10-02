@@ -8,12 +8,12 @@ const WORLDS = 3;
 let playerProfile = {
     name: "Herói",
     class: "Aprendiz",
+    gear: "Livro Sagrado", // NOVO: Equipamento visual
     level: 1,
     xp: 0,
     gold: 0,
     tasksCompleted: 0,
     achievements: [],
-    // Matérias iniciais + as que o usuário criar
     subjects: ["Código", "Matemática", "História", "Geral"],
     activeTasks: [
         { id: 1, description: "Revisar JS Básico", subject: "Código" },
@@ -28,7 +28,7 @@ const availableAchievements = [
     { id: 'level_5', requirement_level: 5, name: 'Mundo Novo Desbloqueado', message: 'Nível 5 alcançado! O mundo de estudo se expandiu. Veja a nova paisagem!' },
 ];
 
-// --- 2. Persistência e Controle de Menu ---
+// --- 2. Persistência e Controle de Modal ---
 
 function loadProfile() {
     const savedProfile = localStorage.getItem('studyQuestProfile');
@@ -47,18 +47,31 @@ function saveProfile() {
 }
 
 /**
- * NOVO: Alterna a visibilidade do menu lateral.
+ * NOVO: Exibe o modal de ferramentas e o painel específico.
+ * @param {string} panelId - O ID do painel de ferramenta a ser mostrado (ex: 'profile-tool').
  */
-function toggleMenu() {
-    document.getElementById('tools-menu').classList.toggle('active');
-    // Chama a renderização da lista de matérias sempre que abre o menu
-    if (document.getElementById('tools-menu').classList.contains('active')) {
-        updateSubjectManagerDOM();
+function showToolPanel(panelId) {
+    document.querySelectorAll('.tool-view').forEach(p => p.classList.add('hidden'));
+    document.getElementById(panelId).classList.remove('hidden');
+    document.getElementById('tool-panel-modal').classList.remove('hidden');
+
+    // Atualiza DOM específico do menu ao abrir
+    if (panelId === 'subject-manager-tool') updateSubjectManagerDOM();
+    if (panelId === 'task-creator-tool') updateSubjectSelectDOM();
+    if (panelId === 'profile-tool') {
+        // Pré-preenche campos de perfil
+        document.getElementById('input-name').value = playerProfile.name;
+        document.getElementById('select-class').value = playerProfile.class;
+        document.getElementById('select-gear').value = playerProfile.gear;
     }
 }
 
+function hideToolPanel() {
+    document.getElementById('tool-panel-modal').classList.add('hidden');
+}
 
-// --- 3. Lógica de Jogo (Game Logic) ---
+
+// --- 3. Lógica de Jogo ---
 
 function setNPCMessage(message) {
     document.getElementById('npc-message').innerHTML = `<p>${message}</p>`;
@@ -91,32 +104,35 @@ function checkAchievements() {
 }
 
 function completeTask(taskId = null) {
-    // 1. Recompensas
     playerProfile.xp += XP_PER_TASK;
     playerProfile.gold += GOLD_PER_TASK;
     playerProfile.tasksCompleted++;
     setNPCMessage(`Missão concluída! Você ganhou ${XP_PER_TASK} XP e ${GOLD_PER_TASK} Ouro.`);
 
-    // 2. Remove a tarefa ativa, se for com ID
     if (taskId !== null) {
         playerProfile.activeTasks = playerProfile.activeTasks.filter(t => t.id !== taskId);
     }
 
-    // 3. Lógica
     checkLevelUp();
     checkAchievements();
-
-    // 4. Atualiza tudo
     saveProfile();
     updateDOM();
 }
 
-
-// --- 4. Funções de Gestão (Perfil, Matérias e Tarefas) ---
-
 /**
- * NOVO: Adiciona uma nova matéria à lista.
+ * NOVO: Reseta todo o progresso do jogador (função de segurança/teste).
  */
+function resetProgress() {
+    if (confirm("ATENÇÃO: Você tem certeza que deseja reiniciar todo o seu progresso? Isso não pode ser desfeito!")) {
+        localStorage.removeItem('studyQuestProfile');
+        // Recarrega a página para iniciar com o perfil padrão
+        location.reload(); 
+    }
+}
+
+
+// --- 4. Funções de Gestão (Matérias e Tarefas) ---
+
 function addSubject() {
     const input = document.getElementById('new-subject-input');
     const newSubject = input.value.trim();
@@ -124,45 +140,38 @@ function addSubject() {
     if (newSubject && !playerProfile.subjects.includes(newSubject)) {
         playerProfile.subjects.push(newSubject);
         input.value = '';
-        setNPCMessage(`Nova matéria "${newSubject}" adicionada ao seu grimório!`);
+        setNPCMessage(`Nova matéria "${newSubject}" adicionada.`);
         saveProfile();
-        updateSubjectSelectDOM(); // Atualiza dropdown de criação de tarefas
-        updateSubjectManagerDOM(); // Atualiza lista de gerenciamento
+        updateSubjectSelectDOM(); 
+        updateSubjectManagerDOM(); 
     } else if (playerProfile.subjects.includes(newSubject)) {
         setNPCMessage("Guardião: Essa matéria já existe, Herói!");
     }
 }
 
-/**
- * NOVO: Remove uma matéria da lista.
- * Garante que a matéria "Geral" não possa ser removida.
- */
 function removeSubject(subjectToRemove) {
     if (subjectToRemove === "Geral") {
         setNPCMessage("Guardião: A matéria 'Geral' é essencial e não pode ser removida!");
         return;
     }
     
-    // Filtra e remove a matéria
+    if (!confirm(`Tem certeza que deseja remover a matéria "${subjectToRemove}"? As missões serão movidas para 'Geral'.`)) return;
+
     playerProfile.subjects = playerProfile.subjects.filter(s => s !== subjectToRemove);
     
-    // Move tarefas da matéria removida para 'Geral'
     playerProfile.activeTasks.forEach(task => {
         if (task.subject === subjectToRemove) {
             task.subject = "Geral";
         }
     });
 
-    setNPCMessage(`Matéria "${subjectToRemove}" removida. Missões realocadas para 'Geral'.`);
+    setNPCMessage(`Matéria "${subjectToRemove}" removida. Missões realocadas.`);
     saveProfile();
     updateSubjectSelectDOM();
     updateSubjectManagerDOM();
     updateTaskListDOM();
 }
 
-/**
- * Adiciona uma nova tarefa com matéria selecionada.
- */
 function addTask() {
     const input = document.getElementById('new-task-input');
     const select = document.getElementById('new-task-subject');
@@ -176,6 +185,7 @@ function addTask() {
         setNPCMessage(`Nova missão registrada em ${subject}.`);
         saveProfile();
         updateTaskListDOM();
+        hideToolPanel(); // Fecha o modal após adicionar
     } else {
         setNPCMessage("Guardião: A missão precisa de uma descrição, Herói!");
     }
@@ -184,25 +194,24 @@ function addTask() {
 function updateProfile() {
     const nameInput = document.getElementById('input-name').value.trim();
     const classSelect = document.getElementById('select-class').value;
+    const gearSelect = document.getElementById('select-gear').value; // NOVO: Equipamento
 
     if (nameInput) {
         playerProfile.name = nameInput;
-        document.getElementById('input-name').value = ''; 
     }
     
     playerProfile.class = classSelect;
+    playerProfile.gear = gearSelect; // Salva o equipamento
 
     saveProfile();
     updateDOM();
-    setNPCMessage(`Perfil atualizado! Você agora é um(a) ${playerProfile.class}.`);
+    setNPCMessage(`Perfil e equipamento (${playerProfile.gear}) atualizados!`);
+    hideToolPanel(); // Fecha o modal após salvar
 }
 
 
 // --- 5. Atualizações de Interface (DOM) ---
 
-/**
- * NOVO: Renderiza a lista de matérias no painel de gerenciamento.
- */
 function updateSubjectManagerDOM() {
     const list = document.getElementById('subject-list-manager');
     list.innerHTML = '';
@@ -220,12 +229,9 @@ function updateSubjectManagerDOM() {
     });
 }
 
-/**
- * NOVO: Popula a dropdown de seleção de matéria para criação de tarefas.
- */
 function updateSubjectSelectDOM() {
     const select = document.getElementById('new-task-subject');
-    select.innerHTML = ''; // Limpa opções existentes
+    select.innerHTML = ''; 
 
     playerProfile.subjects.forEach(subject => {
         const option = document.createElement('option');
@@ -235,19 +241,15 @@ function updateSubjectSelectDOM() {
     });
 }
 
-/**
- * Renderiza a lista de tarefas, agrupando por matéria.
- */
 function updateTaskListDOM() {
     const tasksList = document.getElementById('tasks-list');
     tasksList.innerHTML = ''; 
 
     if (playerProfile.activeTasks.length === 0) {
-        tasksList.innerHTML = '<p class="achievement-placeholder">Nenhuma missão ativa. Crie uma no menu "Ferramentas".</p>';
+        tasksList.innerHTML = '<p class="achievement-placeholder">Nenhuma missão ativa. Use a barra de ações para criar uma!</p>';
         return;
     }
 
-    // Agrupa tarefas por matéria
     const tasksBySubject = playerProfile.activeTasks.reduce((acc, task) => {
         const subject = task.subject || 'Geral'; 
         if (!acc[subject]) {
@@ -257,8 +259,7 @@ function updateTaskListDOM() {
         return acc;
     }, {});
 
-    // Renderiza cada grupo de matéria
-    for (const subject of playerProfile.subjects) { // Itera na ordem das matérias
+    for (const subject of playerProfile.subjects) {
         const tasks = tasksBySubject[subject];
         if (tasks && tasks.length > 0) {
             const groupDiv = document.createElement('div');
@@ -282,9 +283,6 @@ function updateTaskListDOM() {
     }
 }
 
-/**
- * Muda o fundo da página (simula a mudança de "Mundo").
- */
 function changeWorldBackground() {
     const body = document.getElementById('game-body');
     const currentWorld = Math.floor((playerProfile.level - 1) / 5) + 1; 
@@ -296,31 +294,25 @@ function changeWorldBackground() {
     body.classList.add(worldClass);
 }
 
-/**
- * Função mestre para atualizar todo o estado visual.
- */
 function updateDOM() {
-    const { name, level, xp, gold, class: playerClass, achievements } = playerProfile;
+    const { name, level, xp, gold, class: playerClass, achievements, gear } = playerProfile;
 
-    // Atualiza Informações de status
+    // Atualiza Status
     document.getElementById('player-name').textContent = name;
     document.getElementById('player-level').textContent = level;
     document.getElementById('player-gold').textContent = `${gold} G`;
-    document.getElementById('player-class').textContent = playerClass;
-
-    // Atualiza Barra de XP
+    document.getElementById('player-class').textContent = `${playerClass} | ${gear}`; // Exibe o equipamento
+    
+    // Atualiza XP
     const progressPercent = (xp / XP_TO_LEVEL_UP) * 100;
     document.getElementById('xp-bar').style.width = `${progressPercent}%`;
-    document.getElementById('xp-text').textContent = `${xp} / ${XP_TO_LEVEL_UP} XP`;
+    document.getElementById('xp-text').textContent = `${xp} / ${XP_TO_LEVEL_UP} XP (Próximo Nível)`;
 
-    // Atualiza o fundo
+    // Atualiza Listas
     changeWorldBackground(); 
-    
-    // Atualiza listas (Tarefas e Conquistas)
     updateTaskListDOM();
-    updateSubjectSelectDOM(); // Garante que a dropdown de criação de tarefas esteja atualizada
+    updateSubjectSelectDOM(); 
     
-    // Atualiza lista de conquistas (mantido simples)
     const achievementsList = document.getElementById('achievements-list');
     achievementsList.innerHTML = achievements.map(a => 
         `<li class="achievement-item"><strong>${a.name}</strong></li>`
@@ -333,5 +325,5 @@ function updateDOM() {
 document.addEventListener('DOMContentLoaded', () => {
     loadProfile(); 
     updateDOM();   
-    setNPCMessage(`Boas-vindas, ${playerProfile.name}! Sua classe é ${playerProfile.class}. Clique em "Ferramentas" para começar!`);
+    setNPCMessage(`Boas-vindas, ${playerProfile.name}! Seu equipamento atual é: ${playerProfile.gear}.`);
 });
