@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Quest | Painel de Estudo Gamificado</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body id="game-body">
+
+    <header class="game-header">
+        <h1>Study Quest</h1>
+        <div class="header-details">
+            <div class="player-info">
+                <span id="player-name" class="name-text">Herói</span>
+                <span id="player-class" class="class-text"></span>
+                <div class="level-display">
+                    <span class="label">NÍVEL</span>
+                    <span id="player-level" class="level-value">1</span>
+                </div>
+            </div>
+            
+            <div class="gold-display">
+                <span class="label">Ouro</span>
+                <span id="player-gold" class="gold-value">0 G</span>
+            </div>
+        </div>
+
+        <div class="xp-bar-container">
+            <div id="xp-bar" class="xp-bar"></div>
+            <span id="xp-text" class="xp-text">0 / 500 XP</span>
+        </div>
+    </header>
+
+    <button id="menu-toggle-btn" class="game-button menu-toggle-btn" onclick="toggleMenu()">
+        ☰ FERRAMENTAS
+    </button>
+    
+    <aside id="tools-menu" class="tools-menu hidden">
+
+        <button class="game-button close-btn" onclick="toggleMenu()">X Fechar</button>
+
+        <div class="tool-panel profile-panel">
+            <h3><span class="icon">👤</span> Perfil</h3>
+            <label for="input-name">Nome do Herói:</label>
+            <input type="text" id="input-name" placeholder="Digite seu nome">
+            <label for="select-class">Classe:</label>
+            <select id="select-class">
+                <option value="Mago">Mago (Inteligência)</option>
+                <option value="Guerreiro">Guerreiro (Força)</option>
+                <option value="Bardo">Bardo (Carisma)</option>
+            </select>
+            <button class="game-button small-button" onclick="updateProfile()">Salvar Perfil</button>
+        </div>
+
+        <div class="tool-panel task-creator-panel">
+            <h3><span class="icon">📝</span> Criar Missão</h3>
+            <input type="text" id="new-task-input" placeholder="Descrição da Missão">
+            <select id="new-task-subject">
+                </select>
+            <button class="game-button small-button" onclick="addTask()">Adicionar Missão</button>
+        </div>
+
+        <div class="tool-panel subject-manager-panel">
+            <h3><span class="icon">📚</span> Gestão de Matérias</h3>
+            <div class="subject-add-group">
+                <input type="text" id="new-subject-input" placeholder="Ex: Programação Orientada">
+                <button class="game-button small-button add-subject-btn" onclick="addSubject()">Criar</button>
+            </div>
+            <ul id="subject-list-manager" class="subject-list-manager">
+                </ul>
+        </div>
+
+    </aside>
+
+    <main class="dashboard-grid">
+        
+        <section class="panel npc-panel">
+            <h2><span class="icon">🤖</span> Guardião do Conhecimento</h2>
+            <div id="npc-message" class="npc-message">
+                <p>Boas-vindas, Herói! Abra o menu "Ferramentas" para começar sua aventura!</p>
+            </div>
+        </section>
+        
+        <section class="panel tasks-panel">
+            <h2><span class="icon">📜</span> Missões Ativas</h2>
+            
+            <div id="tasks-list" class="tasks-list">
+                <p class="achievement-placeholder">Nenhuma missão ativa. Crie uma no menu "Ferramentas".</p>
+            </div>
+            
+            <button class="game-button large-button" onclick="completeTask()">
+                <span class="icon">⭐</span>
+                Missão Rápida Concluída (+100 XP)
+            </button>
+        </section>
+
+        <section class="panel achievements-panel">
+            <h2><span class="icon">🏆</span> Conquistas</h2>
+            <ul id="achievements-list" class="achievements-list">
+                <li class="achievement-placeholder">Nenhuma conquista ainda.</li>
+            </ul>
+        </section>
+
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
