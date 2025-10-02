@@ -3,16 +3,16 @@
 const XP_TO_LEVEL_UP = 500;
 const XP_PER_TASK = 100;
 const GOLD_PER_TASK = 50;
-const WORLDS = 3; 
 
 let playerProfile = {
     name: "Herói",
     class: "Aprendiz",
-    gear: "Livro Sagrado", // NOVO: Equipamento visual
+    gear: "Livro Sagrado", 
     level: 1,
     xp: 0,
     gold: 0,
     tasksCompleted: 0,
+    theme: "theme-forest", // NOVO: Tema padrão
     achievements: [],
     subjects: ["Código", "Matemática", "História", "Geral"],
     activeTasks: [
@@ -23,12 +23,12 @@ let playerProfile = {
 
 const availableAchievements = [
     { id: 'first_quest', requirement: 1, name: 'Primeira Missão', message: 'Você deu o primeiro passo! A jornada é longa, mas gratificante.' },
-    { id: 'apprentice', requirement: 5, name: 'Aprendiz Dedicado', message: 'Cinco missões! Sua dedicação é notável, continue assim.' },
+    { id: 'apprentice', requirement: 5, name: 'Aprendiz Dedicado', message: 'Sua dedicação é notável. Mantenha o foco!' },
     { id: 'journeyman', requirement: 10, name: 'Viajante do Conhecimento', message: 'Dez tarefas concluídas! Você é um verdadeiro viajante.' },
     { id: 'level_5', requirement_level: 5, name: 'Mundo Novo Desbloqueado', message: 'Nível 5 alcançado! O mundo de estudo se expandiu. Veja a nova paisagem!' },
 ];
 
-// --- 2. Persistência e Controle de Modal ---
+// --- 2. Persistência e Lógica de Tema ---
 
 function loadProfile() {
     const savedProfile = localStorage.getItem('studyQuestProfile');
@@ -47,19 +47,34 @@ function saveProfile() {
 }
 
 /**
- * NOVO: Exibe o modal de ferramentas e o painel específico.
- * @param {string} panelId - O ID do painel de ferramenta a ser mostrado (ex: 'profile-tool').
+ * NOVO: Altera o tema visual do body.
+ * @param {string} newTheme - A classe do tema (ex: 'theme-forest').
  */
+function changeTheme(newTheme) {
+    const body = document.getElementById('game-body');
+    // Remove todos os temas existentes e adiciona o novo.
+    body.className = ''; 
+    body.classList.add(newTheme);
+    
+    playerProfile.theme = newTheme;
+    saveProfile();
+    setNPCMessage(`Guardião: O bioma/tema mudou para **${newTheme.replace('theme-', '').toUpperCase()}**!`);
+    hideToolPanel();
+}
+
+
+// --- 3. Controle de Modal (Janela de Jogo) ---
+
 function showToolPanel(panelId) {
+    // Esconde todos os painéis e mostra o selecionado
     document.querySelectorAll('.tool-view').forEach(p => p.classList.add('hidden'));
     document.getElementById(panelId).classList.remove('hidden');
     document.getElementById('tool-panel-modal').classList.remove('hidden');
 
-    // Atualiza DOM específico do menu ao abrir
+    // Funções de inicialização do painel
     if (panelId === 'subject-manager-tool') updateSubjectManagerDOM();
     if (panelId === 'task-creator-tool') updateSubjectSelectDOM();
     if (panelId === 'profile-tool') {
-        // Pré-preenche campos de perfil
         document.getElementById('input-name').value = playerProfile.name;
         document.getElementById('select-class').value = playerProfile.class;
         document.getElementById('select-gear').value = playerProfile.gear;
@@ -71,21 +86,18 @@ function hideToolPanel() {
 }
 
 
-// --- 3. Lógica de Jogo ---
+// --- 4. Lógica de Jogo e Recompensas ---
 
 function setNPCMessage(message) {
     document.getElementById('npc-message').innerHTML = `<p>${message}</p>`;
 }
 
 function checkLevelUp() {
-    let leveledUp = false;
     while (playerProfile.xp >= XP_TO_LEVEL_UP) {
         playerProfile.level++;
         playerProfile.xp -= XP_TO_LEVEL_UP;
         setNPCMessage(`🎉 NÍVEL ${playerProfile.level} ALCANÇADO! Sua força intelectual aumentou!`);
-        leveledUp = true;
     }
-    return leveledUp;
 }
 
 function checkAchievements() {
@@ -119,19 +131,15 @@ function completeTask(taskId = null) {
     updateDOM();
 }
 
-/**
- * NOVO: Reseta todo o progresso do jogador (função de segurança/teste).
- */
 function resetProgress() {
-    if (confirm("ATENÇÃO: Você tem certeza que deseja reiniciar todo o seu progresso? Isso não pode ser desfeito!")) {
+    if (confirm("ATENÇÃO: Você tem certeza que deseja reiniciar todo o seu progresso?")) {
         localStorage.removeItem('studyQuestProfile');
-        // Recarrega a página para iniciar com o perfil padrão
         location.reload(); 
     }
 }
 
 
-// --- 4. Funções de Gestão (Matérias e Tarefas) ---
+// --- 5. Funções de Gestão ---
 
 function addSubject() {
     const input = document.getElementById('new-subject-input');
@@ -155,7 +163,7 @@ function removeSubject(subjectToRemove) {
         return;
     }
     
-    if (!confirm(`Tem certeza que deseja remover a matéria "${subjectToRemove}"? As missões serão movidas para 'Geral'.`)) return;
+    if (!confirm(`Tem certeza que deseja remover "${subjectToRemove}"? Missões serão movidas para 'Geral'.`)) return;
 
     playerProfile.subjects = playerProfile.subjects.filter(s => s !== subjectToRemove);
     
@@ -165,7 +173,7 @@ function removeSubject(subjectToRemove) {
         }
     });
 
-    setNPCMessage(`Matéria "${subjectToRemove}" removida. Missões realocadas.`);
+    setNPCMessage(`Matéria "${subjectToRemove}" removida.`);
     saveProfile();
     updateSubjectSelectDOM();
     updateSubjectManagerDOM();
@@ -185,7 +193,7 @@ function addTask() {
         setNPCMessage(`Nova missão registrada em ${subject}.`);
         saveProfile();
         updateTaskListDOM();
-        hideToolPanel(); // Fecha o modal após adicionar
+        hideToolPanel(); 
     } else {
         setNPCMessage("Guardião: A missão precisa de uma descrição, Herói!");
     }
@@ -194,23 +202,23 @@ function addTask() {
 function updateProfile() {
     const nameInput = document.getElementById('input-name').value.trim();
     const classSelect = document.getElementById('select-class').value;
-    const gearSelect = document.getElementById('select-gear').value; // NOVO: Equipamento
+    const gearSelect = document.getElementById('select-gear').value; 
 
     if (nameInput) {
         playerProfile.name = nameInput;
     }
     
     playerProfile.class = classSelect;
-    playerProfile.gear = gearSelect; // Salva o equipamento
+    playerProfile.gear = gearSelect; 
 
     saveProfile();
     updateDOM();
     setNPCMessage(`Perfil e equipamento (${playerProfile.gear}) atualizados!`);
-    hideToolPanel(); // Fecha o modal após salvar
+    hideToolPanel(); 
 }
 
 
-// --- 5. Atualizações de Interface (DOM) ---
+// --- 6. Atualizações de Interface (DOM) ---
 
 function updateSubjectManagerDOM() {
     const list = document.getElementById('subject-list-manager');
@@ -221,8 +229,8 @@ function updateSubjectManagerDOM() {
         li.className = 'subject-item';
         li.innerHTML = `
             <span>${subject}</span>
-            <button class="game-button remove-btn" onclick="removeSubject('${subject}')">
-                Remover
+            <button class="game-button remove-btn action-danger" onclick="removeSubject('${subject}')">
+                <span class="material-icons">delete</span>
             </button>
         `;
         list.appendChild(li);
@@ -246,7 +254,7 @@ function updateTaskListDOM() {
     tasksList.innerHTML = ''; 
 
     if (playerProfile.activeTasks.length === 0) {
-        tasksList.innerHTML = '<p class="achievement-placeholder">Nenhuma missão ativa. Use a barra de ações para criar uma!</p>';
+        tasksList.innerHTML = '<p class="achievement-placeholder">Nenhuma missão ativa. Crie uma na barra de ações!</p>';
         return;
     }
 
@@ -271,8 +279,8 @@ function updateTaskListDOM() {
                 taskItem.className = 'task-item';
                 taskItem.innerHTML = `
                     <p>${task.description}</p>
-                    <button class="game-button small-button" onclick="completeTask(${task.id})">
-                        Concluir
+                    <button class="game-button small-button action-confirm" onclick="completeTask(${task.id})">
+                        <span class="material-icons">check</span>
                     </button>
                 `;
                 groupDiv.appendChild(taskItem);
@@ -283,33 +291,25 @@ function updateTaskListDOM() {
     }
 }
 
-function changeWorldBackground() {
-    const body = document.getElementById('game-body');
-    const currentWorld = Math.floor((playerProfile.level - 1) / 5) + 1; 
-    
-    const worldClassIndex = (currentWorld % WORLDS) || WORLDS; 
-    const worldClass = `world-${worldClassIndex}`;
-    
-    body.className = ''; 
-    body.classList.add(worldClass);
-}
-
 function updateDOM() {
-    const { name, level, xp, gold, class: playerClass, achievements, gear } = playerProfile;
+    const { name, level, xp, gold, class: playerClass, achievements, gear, theme } = playerProfile;
+
+    // Atualiza Tema (garante que o tema salvo seja aplicado)
+    changeTheme(theme);
 
     // Atualiza Status
     document.getElementById('player-name').textContent = name;
     document.getElementById('player-level').textContent = level;
-    document.getElementById('player-gold').textContent = `${gold} G`;
-    document.getElementById('player-class').textContent = `${playerClass} | ${gear}`; // Exibe o equipamento
+    // Ouro com ícone e formatação:
+    document.getElementById('player-gold').innerHTML = `<span class="material-icons coin-icon">monetization_on</span> ${gold}`;
+    document.getElementById('player-class').textContent = `${playerClass} | ${gear}`; 
     
     // Atualiza XP
     const progressPercent = (xp / XP_TO_LEVEL_UP) * 100;
     document.getElementById('xp-bar').style.width = `${progressPercent}%`;
-    document.getElementById('xp-text').textContent = `${xp} / ${XP_TO_LEVEL_UP} XP (Próximo Nível)`;
+    document.getElementById('xp-text').textContent = `${xp} / ${XP_TO_LEVEL_UP} XP`;
 
     // Atualiza Listas
-    changeWorldBackground(); 
     updateTaskListDOM();
     updateSubjectSelectDOM(); 
     
@@ -320,10 +320,10 @@ function updateDOM() {
 }
 
 
-// --- 6. Inicialização ---
+// --- 7. Inicialização ---
 
 document.addEventListener('DOMContentLoaded', () => {
     loadProfile(); 
     updateDOM();   
-    setNPCMessage(`Boas-vindas, ${playerProfile.name}! Seu equipamento atual é: ${playerProfile.gear}.`);
+    setNPCMessage(`Guardião: O bioma **${playerProfile.theme.replace('theme-', '').toUpperCase()}** está ativo. Qual será sua próxima missão?`);
 });
