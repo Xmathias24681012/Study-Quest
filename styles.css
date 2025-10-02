@@ -1,22 +1,70 @@
 /* Importação de fontes */
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons'); /* Ícones */
 
+/* --- Variáveis de Cor Padrão (Tema Floresta Mística) --- */
 :root {
-    /* Cores do tema Game Dashboard */
+    /* Base */
     --color-background: #1a1a2e;
     --color-panel: #2c2c54;
-    --color-primary: #ffc300;   /* Amarelo/Ouro para destaque */
-    --color-secondary: #ff5733;  /* Laranja/Vermelho para botões */
-    --color-gold: #ffd700;
-    --color-text: #e5e5e5;
-    --color-xp-bar: #00ff41;    /* Verde Neônio (Vida/Energia) */
     --color-shadow: #141424;
-    --color-button-hover: #e04b2a;
-    --color-npc: #7b00ff; /* Púrpura Mágico */
-    --color-action-bar: #1f1f3a; /* Fundo da barra de ações */
+    --color-text: #e5e5e5;
+    
+    /* Cores de Jogo */
+    --color-primary: #ffc300;   /* Ouro (Destaque Principal) */
+    --color-secondary: #ff5733;  /* Laranja (Bordas, Botões Padrão) */
+    --color-xp-bar: #00ff41;    /* Verde (Vida/XP) */
+    --color-gold: #ffd700;      /* Ouro para Moeda */
+    --color-npc: #7b00ff;       /* Púrpura (NPC/Diálogo) */
+    
+    /* Ações */
+    --color-action-confirm: #00a86b; /* Botão Confirmar/Salvar (Esmeralda) */
+    --color-action-danger: #cc0000;  /* Botão Perigo/Resetar (Vermelho) */
+
+    /* UI Estilizada */
+    --panel-border-style: 4px ridge var(--color-secondary);
+    --panel-box-shadow: 0 5px 15px rgba(0, 0, 0, 0.7), 0 0 10px rgba(255, 195, 0, 0.2);
 }
 
-/* Base e Tipografia */
+/* --- TEMAS DINÂMICOS (Biomas/Worlds) --- */
+
+/* 1. FLORESTA MÍSTICA (Padrão) */
+.theme-forest {
+    --color-xp-bar: #00ff41; 
+    --color-npc: #7b00ff;
+    --panel-border-style: 4px ridge var(--color-secondary);
+    background-image: linear-gradient(rgba(26, 26, 46, 0.8), rgba(26, 26, 46, 0.8)), url('https://picsum.photos/id/1018/1200/800');
+}
+.theme-forest .xp-bar { background-color: var(--color-xp-bar); }
+
+/* 2. MASMORRA SOMBRIA */
+.theme-dungeon {
+    --color-xp-bar: #c90000; /* Vermelho Escuro */
+    --color-npc: #420080;    /* Púrpura Fundo */
+    --color-primary: #a0a0a0; /* Prata */
+    --color-secondary: #5a5a5a; /* Cinza Metálico */
+    --color-panel: #333333;
+    --color-shadow: #202020;
+    --panel-border-style: 4px groove var(--color-secondary);
+    background-image: linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.9)), url('https://picsum.photos/id/1040/1200/800');
+}
+.theme-dungeon .xp-bar { background-color: var(--color-xp-bar); }
+
+/* 3. CÉU FLUTUANTE */
+.theme-sky {
+    --color-xp-bar: #00aaff; /* Azul Céu */
+    --color-npc: #0055ff;    /* Azul Forte */
+    --color-primary: #ffffff; /* Branco */
+    --color-secondary: #00aaff;
+    --color-panel: #45628a; /* Azul claro/Cinza */
+    --color-shadow: #2a3b50;
+    --panel-border-style: 4px outset var(--color-secondary);
+    background-image: linear-gradient(rgba(69, 98, 138, 0.8), rgba(69, 98, 138, 0.8)), url('https://picsum.photos/id/1084/1200/800');
+}
+.theme-sky .xp-bar { background-color: var(--color-xp-bar); }
+
+
+/* --- BASE GLOBAL --- */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -25,22 +73,25 @@
 
 body {
     font-family: 'Roboto', sans-serif;
-    background-color: var(--color-background);
     color: var(--color-text);
-    padding-top: 130px; /* Espaço para o header fixo */
-    padding-bottom: 80px; /* Espaço para a action bar fixa */
+    padding-top: 130px; 
+    padding-bottom: 80px; 
     padding-left: 20px;
     padding-right: 20px;
     background-size: cover;
     background-position: center;
     background-blend-mode: multiply;
-    transition: background-image 1.5s ease-in-out;
+    transition: background-image 1.5s ease-in-out; /* Suavidade na troca de bioma */
 }
 
-/* --- ESTILOS DE FUNDO (WORLDS/PAISAGENS) --- */
-.world-1 { background-image: linear-gradient(rgba(26, 26, 46, 0.8), rgba(26, 26, 46, 0.8)), url('https://picsum.photos/id/1018/1200/800'); } 
-.world-2 { background-image: linear-gradient(rgba(26, 26, 46, 0.8), rgba(26, 26, 46, 0.8)), url('https://picsum.photos/id/1040/1200/800'); } 
-.world-3 { background-image: linear-gradient(rgba(26, 26, 46, 0.8), rgba(26, 26, 46, 0.8)), url('https://picsum.photos/id/1084/1200/800'); } 
+h1, h2, h3 {
+    font-family: 'Press Start 2P', cursive;
+    color: var(--color-primary);
+    text-shadow: 2px 2px var(--color-shadow);
+    margin-bottom: 15px;
+}
+h2 { font-size: 1em; }
+h3 { font-size: 0.8em; }
 
 /* --- HEADER PRINCIPAL (STATUS BAR FIXA) --- */
 .game-header {
@@ -49,196 +100,205 @@ body {
     left: 0;
     width: 100%;
     z-index: 10;
-    background: linear-gradient(145deg, var(--color-panel), #3c3c6d);
-    border-bottom: 3px solid var(--color-primary);
+    background-color: var(--color-panel);
+    border-bottom: var(--panel-border-style);
     padding: 10px 30px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
-}
-.game-header h1 {
-    font-size: 1.2em;
-    margin-bottom: 5px;
+    box-shadow: var(--panel-box-shadow);
 }
 
-.header-details {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
+/* Informações do Jogador */
+.player-info, .level-display, .gold-display {
+    padding: 3px 8px;
+    border: 2px solid var(--color-primary);
+    border-radius: 5px;
+    background-color: var(--color-shadow);
+    line-height: 1.2;
 }
 
-.player-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.name-text, .class-text {
-    font-size: 1em;
-    font-weight: 700;
-}
 .class-text {
     color: var(--color-xp-bar);
-    font-family: 'Press Start 2P', cursive;
-    font-size: 0.6em;
 }
-.level-display {
-    padding: 3px 8px;
-}
-.level-value {
+.coin-icon {
     font-size: 1.2em;
-}
-.gold-display {
-    padding: 3px 8px;
-}
-.gold-value {
-    font-size: 1.2em;
+    vertical-align: middle;
+    color: var(--color-gold);
+    text-shadow: 0 0 5px var(--color-gold);
 }
 
-/* XP Bar Aprimorada (Barra de Vida) */
+/* Barra de XP Estilizada (HP/Mana) */
 .xp-bar-container {
-    height: 20px;
+    height: 25px;
+    background-color: var(--color-shadow);
+    border: 3px solid var(--color-primary);
+    border-radius: 5px;
+    position: relative;
+    overflow: hidden;
+    margin-top: 5px;
 }
 .xp-bar {
-    /* Estilo de barra de vida/mana, com sombra interna e borda */
-    border: 1px solid var(--color-shadow);
-    background-color: var(--color-xp-bar);
+    height: 100%;
+    width: 0%;
+    background: repeating-linear-gradient(
+        -45deg,
+        var(--color-xp-bar),
+        var(--color-xp-bar) 5px,
+        rgba(0,0,0,0.1) 5px,
+        rgba(0,0,0,0.1) 10px
+    );
+    transition: width 0.5s ease-in-out;
+    box-shadow: inset 0 0 10px var(--color-shadow); /* Profundidade */
 }
 .xp-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     font-size: 0.7em;
+    font-weight: 700;
+    text-shadow: 1px 1px 2px #000;
+    z-index: 1;
 }
 
-/* --- GRID PRINCIPAL --- */
+/* --- GRID PRINCIPAL E PAINÉIS --- */
 .dashboard-grid {
     display: grid;
     grid-template-columns: 2fr 1fr; 
     gap: 20px;
-    margin-top: 10px;
 }
 
-.npc-panel {
-    grid-column: 1 / 3; 
-    border-color: var(--color-npc);
-}
-.npc-message {
-    min-height: 40px;
-}
-
-/* --- PAINÉIS SECUNDÁRIOS --- */
 .panel {
     background-color: var(--color-panel);
-    border: 2px solid var(--color-secondary);
+    border: var(--panel-border-style);
     border-radius: 10px;
     padding: 20px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
-.subject-group h3 {
-    font-family: 'Press Start 2P', cursive;
-    font-size: 0.9em;
+.icon-style {
     color: var(--color-xp-bar);
-    border-bottom: 1px dashed var(--color-xp-bar);
-    padding-bottom: 5px;
-    margin-bottom: 10px;
+    vertical-align: middle;
+    font-size: 1.2em;
 }
 
-/* --- BARRA DE AÇÕES INFERIOR (FIXA) --- */
+/* NPC Panel (Caixa de Diálogo) */
+.npc-panel {
+    grid-column: 1 / 3; 
+    border-color: var(--color-npc);
+}
+.npc-message {
+    background-color: var(--color-shadow);
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid var(--color-npc);
+    min-height: 40px;
+    animation: pulseGlow 1.5s infinite alternate;
+    font-style: italic;
+}
+.dialog-box::before {
+    content: "NPC: ";
+    font-weight: bold;
+    color: var(--color-npc);
+}
+@keyframes pulseGlow {
+    from { box-shadow: 0 0 5px var(--color-npc); }
+    to { box-shadow: 0 0 15px rgba(123, 0, 255, 0.5); }
+}
+
+/* --- ESTILO DE TAREFAS AGRUPADAS --- */
+.subject-group {
+    border: 1px dashed var(--color-shadow);
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+}
+.task-item {
+    border-left: 5px solid var(--color-xp-bar);
+}
+
+/* --- BOTÕES (Aprimorados) --- */
+.game-button {
+    font-family: 'Press Start 2P', cursive;
+    background-color: var(--color-secondary);
+    color: var(--color-text);
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.7em;
+    transition: background-color 0.15s, transform 0.1s, box-shadow 0.15s;
+    box-shadow: 0 4px 0 var(--color-shadow); /* Efeito 3D */
+}
+.game-button:active {
+    transform: translateY(4px);
+    box-shadow: 0 0px 0 var(--color-shadow);
+}
+.game-button.action-confirm {
+    background-color: var(--color-action-confirm);
+}
+.game-button.action-danger {
+    background-color: var(--color-action-danger);
+}
+.large-button {
+    background-color: var(--color-npc); /* Botão de ação principal em Púrpura */
+}
+
+/* --- BARRA DE AÇÕES INFERIOR (MENU RÁPIDO) --- */
 .action-bar {
     position: fixed;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 60px;
-    background-color: var(--color-action-bar);
-    border-top: 3px solid var(--color-primary);
-    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.7);
+    height: 70px;
+    background-color: var(--color-shadow);
+    border-top: var(--panel-border-style);
     z-index: 10;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    padding: 0 10px;
 }
-
 .action-btn {
-    flex-grow: 1;
-    margin: 0 5px;
-    font-size: 0.7em;
-    padding: 10px 5px;
-    box-shadow: 0 3px 0 var(--color-button-hover);
+    box-shadow: 0 3px 0 var(--color-shadow);
+    background-color: var(--color-panel);
+    border: 2px outset var(--color-secondary);
 }
-.action-btn .icon {
-    display: block;
-    font-size: 1.2em;
-    margin-bottom: 3px;
+.action-btn:hover {
+    background-color: var(--color-secondary);
 }
 
-
-/* --- PAINEL DE FERRAMENTAS MODAL (POPUP) --- */
+/* --- PAINEL DE FERRAMENTAS MODAL (POPUP de JANELA DE JOGO) --- */
 .tool-panel-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.8); /* Fundo escuro */
-    z-index: 100;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: opacity 0.3s ease;
+    /* Fundo semitransparente mais escuro */
+    background-color: rgba(0, 0, 0, 0.9); 
 }
 
 .tool-panel-content {
-    background-color: var(--color-menu-bg, #111122);
-    border: 5px solid var(--color-primary);
-    border-radius: 15px;
-    padding: 30px;
-    width: 90%;
-    max-width: 500px;
-    max-height: 80vh;
-    overflow-y: auto;
+    background-color: var(--color-panel);
+    border: 5px ridge var(--color-primary); /* Borda de janela de jogo */
+    border-radius: 0; /* Sem bordas arredondadas para estilo clássico */
     box-shadow: 0 0 30px rgba(255, 195, 0, 0.5);
-    position: relative;
 }
 
-.tool-view {
-    padding: 15px 0;
-    border-top: 1px dashed var(--color-secondary);
-    margin-top: 10px;
+.tool-view h3 {
+    color: var(--color-xp-bar);
+    border-bottom: 1px dashed var(--color-xp-bar);
 }
-.tool-view:first-child {
-    border-top: none;
-    margin-top: 0;
-}
-
 .close-tool-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
+    top: -30px; /* Posiciona fora da borda superior */
+    right: 5px;
+    font-size: 0.7em;
+    background-color: var(--color-secondary);
+}
+
+/* Seleção de Tema */
+.theme-description {
+    margin-bottom: 15px;
+    font-style: italic;
+    color: var(--color-primary);
+}
+.theme-buttons-container {
+    display: flex;
+    gap: 10px;
+}
+.theme-btn {
+    flex-grow: 1;
     font-size: 0.6em;
-    background-color: #8b0000;
-    box-shadow: 0 3px 0 #5a0000;
-}
-
-.tool-panel-content label {
-    display: block;
-    margin-top: 10px;
-    margin-bottom: 5px;
-    font-size: 0.9em;
-    font-weight: bold;
-}
-.tool-panel-content input, .tool-panel-content select {
-    width: 100%;
-    padding: 8px;
-    border-radius: 4px;
-    border: 1px solid var(--color-primary);
-    background-color: var(--color-shadow);
-    color: var(--color-text);
-    margin-bottom: 10px;
-}
-
-.reset-btn {
-    background-color: #8b0000;
-    box-shadow: 0 3px 0 #5a0000;
-    margin-top: 15px;
 }
 
 .hidden {
@@ -247,33 +307,12 @@ body {
 
 /* Responsividade */
 @media (max-width: 768px) {
-    body {
-        padding-left: 10px;
-        padding-right: 10px;
-    }
-    .dashboard-grid {
-        grid-template-columns: 1fr;
-    }
-    .npc-panel, .tasks-panel, .achievements-panel {
-        grid-column: 1 / 2;
-    }
-    .game-header {
-        padding: 10px;
-    }
-    .header-details {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    .player-info {
-        margin-bottom: 5px;
-    }
-    .gold-display {
-        align-self: flex-end;
-    }
-    .action-bar {
-        height: 70px;
-    }
-    .action-btn {
-        font-size: 0.6em;
-    }
+    /* Ajustes para mobile */
+    .game-header { padding: 10px; }
+    .header-details { flex-direction: column; align-items: flex-start; }
+    .gold-display { align-self: flex-end; }
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .npc-panel, .tasks-panel, .achievements-panel { grid-column: 1 / 2; }
+    .action-btn { font-size: 0.55em; }
+    .tool-panel-content { max-width: 95%; }
 }
