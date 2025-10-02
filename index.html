@@ -29,57 +29,16 @@
 
         <div class="xp-bar-container">
             <div id="xp-bar" class="xp-bar"></div>
-            <span id="xp-text" class="xp-text">0 / 500 XP</span>
+            <span id="xp-text" class="xp-text">0 / 500 XP (Próximo Nível)</span>
         </div>
     </header>
-
-    <button id="menu-toggle-btn" class="game-button menu-toggle-btn" onclick="toggleMenu()">
-        ☰ FERRAMENTAS
-    </button>
-    
-    <aside id="tools-menu" class="tools-menu hidden">
-
-        <button class="game-button close-btn" onclick="toggleMenu()">X Fechar</button>
-
-        <div class="tool-panel profile-panel">
-            <h3><span class="icon">👤</span> Perfil</h3>
-            <label for="input-name">Nome do Herói:</label>
-            <input type="text" id="input-name" placeholder="Digite seu nome">
-            <label for="select-class">Classe:</label>
-            <select id="select-class">
-                <option value="Mago">Mago (Inteligência)</option>
-                <option value="Guerreiro">Guerreiro (Força)</option>
-                <option value="Bardo">Bardo (Carisma)</option>
-            </select>
-            <button class="game-button small-button" onclick="updateProfile()">Salvar Perfil</button>
-        </div>
-
-        <div class="tool-panel task-creator-panel">
-            <h3><span class="icon">📝</span> Criar Missão</h3>
-            <input type="text" id="new-task-input" placeholder="Descrição da Missão">
-            <select id="new-task-subject">
-                </select>
-            <button class="game-button small-button" onclick="addTask()">Adicionar Missão</button>
-        </div>
-
-        <div class="tool-panel subject-manager-panel">
-            <h3><span class="icon">📚</span> Gestão de Matérias</h3>
-            <div class="subject-add-group">
-                <input type="text" id="new-subject-input" placeholder="Ex: Programação Orientada">
-                <button class="game-button small-button add-subject-btn" onclick="addSubject()">Criar</button>
-            </div>
-            <ul id="subject-list-manager" class="subject-list-manager">
-                </ul>
-        </div>
-
-    </aside>
 
     <main class="dashboard-grid">
         
         <section class="panel npc-panel">
             <h2><span class="icon">🤖</span> Guardião do Conhecimento</h2>
             <div id="npc-message" class="npc-message">
-                <p>Boas-vindas, Herói! Abra o menu "Ferramentas" para começar sua aventura!</p>
+                <p>Boas-vindas, Herói! Use a barra de ações abaixo para gerenciar sua aventura.</p>
             </div>
         </section>
         
@@ -87,7 +46,7 @@
             <h2><span class="icon">📜</span> Missões Ativas</h2>
             
             <div id="tasks-list" class="tasks-list">
-                <p class="achievement-placeholder">Nenhuma missão ativa. Crie uma no menu "Ferramentas".</p>
+                <p class="achievement-placeholder">Nenhuma missão ativa. Use a barra de ações para criar uma!</p>
             </div>
             
             <button class="game-button large-button" onclick="completeTask()">
@@ -104,6 +63,62 @@
         </section>
 
     </main>
+
+    <footer id="action-bar" class="action-bar">
+        <button class="game-button action-btn" data-panel="profile-tool" onclick="showToolPanel('profile-tool')">
+            <span class="icon">👤</span> Perfil
+        </button>
+        <button class="game-button action-btn" data-panel="task-creator-tool" onclick="showToolPanel('task-creator-tool')">
+            <span class="icon">📝</span> Criar Missão
+        </button>
+        <button class="game-button action-btn" data-panel="subject-manager-tool" onclick="showToolPanel('subject-manager-tool')">
+            <span class="icon">📚</span> Matérias
+        </button>
+    </footer>
+
+    <div id="tool-panel-modal" class="tool-panel-modal hidden">
+        <div class="tool-panel-content">
+            <button class="game-button close-tool-btn" onclick="hideToolPanel()">X Fechar</button>
+
+            <div id="profile-tool" class="tool-view hidden">
+                <h3><span class="icon">👤</span> Perfil do Herói</h3>
+                <label for="input-name">Nome do Herói:</label>
+                <input type="text" id="input-name" placeholder="Digite seu nome">
+                <label for="select-class">Classe:</label>
+                <select id="select-class">
+                    <option value="Mago">Mago (Inteligência)</option>
+                    <option value="Guerreiro">Guerreiro (Força)</option>
+                    <option value="Bardo">Bardo (Carisma)</option>
+                </select>
+                <label for="select-gear">Equipamento Visual:</label>
+                <select id="select-gear">
+                    <option value="Livro Sagrado">Livro Sagrado</option>
+                    <option value="Espada Curta">Espada Curta</option>
+                    <option value="Mochila de Couro">Mochila de Couro</option>
+                </select>
+                <button class="game-button small-button" onclick="updateProfile()">Salvar Perfil</button>
+                <button class="game-button small-button reset-btn" onclick="resetProgress()">Reiniciar Progresso (Cuidado!)</button>
+            </div>
+
+            <div id="task-creator-tool" class="tool-view hidden">
+                <h3><span class="icon">📝</span> Criar Missão</h3>
+                <input type="text" id="new-task-input" placeholder="Descrição da Missão">
+                <select id="new-task-subject">
+                    </select>
+                <button class="game-button small-button" onclick="addTask()">Adicionar Missão</button>
+            </div>
+
+            <div id="subject-manager-tool" class="tool-view hidden">
+                <h3><span class="icon">📚</span> Gestão de Matérias</h3>
+                <div class="subject-add-group">
+                    <input type="text" id="new-subject-input" placeholder="Ex: Programação Orientada">
+                    <button class="game-button small-button add-subject-btn" onclick="addSubject()">Criar</button>
+                </div>
+                <ul id="subject-list-manager" class="subject-list-manager">
+                    </ul>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
